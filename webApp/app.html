@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <title>Baby Activity Tracker </title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://js.arcgis.com/4.3/esri/css/main.css">
+</head>
+
+<body>
+    <div style="margin-left: 15px" id="messageUpdates" >
+        <div class="info panel panel-default">
+            <div class="panel-heading">
+                <div class="dropdown pull-right">
+                    <button id="accountLink" class="btn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Account <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="accountLink">
+                        <li><a id="signOut" href="#">Sign out</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="panel-body">
+                <ol id="updates">
+                </ol>
+            </div>
+        </div>
+
+        <div id="errorMessage" class="configMessage" style="display: none;">
+            <div class="backdrop"></div>
+            <div class="panel panel-danger">
+                <div class="panel-heading">
+                    <h3 class="panel-title">An error occourred</h3>
+                </div>
+                <div class="panel-body">
+                    <p id="errorMessageText"></p>
+                </div>
+            </div>
+        </div>
+
+        
+        <!--Create 6 switch buttons that will call the API to log the activity.-->
+        
+        <div class="btn-group" data-toggle="buttons">
+            <label class="btn btn-primary">
+                <input type="radio" name="1stLevelOptions" id="feed" autocomplete="off"> Feed
+            </label>
+            <label class="btn btn-primary">
+                <input type="radio" name="1stLevelOptions" id="sleep" autocomplete="off"> Sleep
+            </label>
+            <label class="btn btn-primary">
+                <input type="radio" name="1stLevelOptions" id="diaper" autocomplete="off"> Diaper
+            </label>
+            <label class="btn btn-primary">
+                <input type="radio" name="1stLevelOptions" id="tumyTime" autocomplete="off"> TummyTime
+            </label>
+            <label class="btn btn-primary">
+                <input type="radio" name="1stLevelOptions" id="pump" autocomplete="off"> Pump
+            </label>
+            <!-- <label class="btn btn-primary">
+                <input type="radio" name="1stLevelOptions" id="medice" autocomplete="off"> Medicine
+            </label> -->
+        </div>
+        <h6></h6>
+    <!-- Only when chosing diaper change,  we need to ask the user if it was dry, wet, or both. Hide this selection when diaper change is not selected -->
+        <div id="diaperOptions" style="display: none;">
+            <div class="btn-group" data-toggle="buttons">
+                <label class="btn btn-primary">
+                    <input type="radio" name="2ndLevelOptions" id="dry" autocomplete="off"> Dry
+                </label>
+                <label class="btn btn-primary">
+                    <input type="radio" name="2ndLevelOptions" id="wet" autocomplete="off"> Wet
+                </label>
+                <label class="btn btn-primary">
+                    <input type="radio" name="2ndLevelOptions" id="dirty" autocomplete="off"> Dirty
+                </label>
+                <label class="btn btn-primary">
+                    <input type="radio" name="2ndLevelOptions" id="both" autocomplete="off"> Both
+                </label>
+            </div>
+        </div>
+        <h6></h6>
+        <!--For tummy time and sleep, we need to ask the user how long it lasted. Hide this election when tummy time or sleep is not selected. Creat intervals of 10 minutes starting at 10 and end at 1 hour, create a +1 hour for the exceptions--> 
+        <div id="timeOptions" style="display: none;">
+            <div class="btn-group" data-toggle="buttons">
+                <label class="btn btn-primary">
+                    <input type="radio" name="2ndLevelOptions" id="10_min" autocomplete="off"> 10 min
+                </label>
+                <label class="btn btn-primary">
+                    <input type="radio" name="2ndLevelOptions" id="20_min" autocomplete="off"> 20 min
+                </label>
+                <label class="btn btn-primary">
+                    <input type="radio" name="2ndLevelOptions" id="30_min" autocomplete="off"> 30 min
+                </label>
+                <label class="btn btn-primary">
+                    <input type="radio" name="2ndLevelOptions" id="40_min" autocomplete="off"> 40 min
+                </label>
+                <label class="btn btn-primary">
+                    <input type="radio" name="2ndLevelOptions" id="50_min" autocomplete="off"> 50 min
+                </label>
+                <label class="btn btn-primary">
+                    <input type="radio" name="2ndLevelOptions" id="1_hour" autocomplete="off"> 1 hour
+                </label>
+                <label class="btn btn-primary">
+                    <input type="radio" name="2ndLevelOptions" id="+1_hour" autocomplete="off"> +1 hour
+                </label>
+            </div>
+        </div>
+        <h6></h6>
+    <!-- Only when chosing  feed, we need to ask the user if it was breast or bottle. Hide this election when feed is not selected. -->
+        <div id="feedOptions" style="display: none;">
+            <div class="btn-group" data-toggle="buttons">
+                <label class="btn btn-primary">
+                    <input type="radio" name="2ndLevelOptions" id="breast" autocomplete="off"> Breast
+                </label>
+                <label class="btn btn-primary">
+                    <input type="radio" name="2ndLevelOptions" id="bottle" autocomplete="off"> Bottle
+                </label>
+            </div>
+            <h6></h6>
+            <!-- if it was breast, we need to ask the user if it was left or right.  Hide this election when bottle is not selected.-->
+            <div id="breastOptions" style="display: none;">
+                <div class="btn-group" data-toggle="buttons">
+                    <label class="btn btn-primary">
+                        <input type="radio" name="3rdLevelOptions" id="left" autocomplete="off"> Left
+                    </label>
+                    <label class="btn btn-primary">
+                        <input type="radio" name="3rdLevelOptions" id="right" autocomplete="off"> Right
+                    </label>
+                </div>
+            </div>
+        </div>
+        <h6></h6>
+        <div id="pumpOptions" style="display: none;">
+                <div class="btn-group" data-toggle="buttons">
+                    <label class="btn btn-primary">
+                        <input type="radio" name="2ndLevelOptions" id="left" autocomplete="off"> Left
+                    </label>
+                    <label class="btn btn-primary">
+                        <input type="radio" name="2ndLevelOptions" id="right" autocomplete="off"> Right
+                    </label>
+                </div>
+            </div>
+
+            <h6></h6>
+        
+            <div id="authTokenModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="authToken">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel">Your Auth Token</h4>
+                        </div>
+                        <div class="modal-body">
+                            <textarea class="authToken"></textarea>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <h6></h6>
+            <div>
+                <button id="request" class="btn btn-success">Log Activity</button>
+            </div>
+
+
+        <script src="js/vendor/jquery-3.1.0.js"></script>
+        <script src="js/vendor/bootstrap.min.js"></script>
+        <script src="js/vendor/aws-cognito-sdk.min.js"></script>
+        <script src="js/vendor/amazon-cognito-identity.min.js"></script>
+        <script src="https://js.arcgis.com/4.3/"></script>
+        <script src="js/config.js"></script>
+        <script src="js/cognito-auth.js"></script>
+        <script src="js/app.js"></script>
+    </div>
+</body>
+
+</html>
